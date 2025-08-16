@@ -1,40 +1,33 @@
 
-# Project Title  
-This is an example ReadMe with light selections.  
+# Stores API 
+Study project with Python and Flask. API for management stores.  
 
 ## Run Locally  
 
 Clone the project  
 
 ~~~bash  
-  git clone https://link-to-project
+  git clone https://github.com/BabaykaBo/store_api_app
 ~~~
 
 Go to the project directory  
 
 ~~~bash  
-  cd my-project
+  cd store_api_app
 ~~~
 
 Install dependencies  
 
 ~~~bash  
-npm install
+pip install -r requirements.txt
 ~~~
 
 Start the server  
 
 ~~~bash  
-npm run start
+flask run
 ~~~
 
-## Contributing  
-
-Contributions are always welcome!  
-
-See `contributing.md` for ways to get started.  
-
-Please adhere to this project's `code of conduct`.  
 
 ## License  
 

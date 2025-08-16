@@ -1,54 +1,64 @@
 from typing import Any, List
+import uuid
 from flask import Flask, request
+from db import stores, items
 
 app: Flask = Flask(__name__)
 
-stores: List[dict[str, Any]] = [
-    {"name": "Stores", "items": [{"name": "Chair", "price": 15.99}]}
-]
+
+def create_id() -> str:
+    return uuid.uuid4().hex
+
 
 # Stores
 
 
 @app.get("/stores")
 def get_stores():
-    return {"stores": stores}
+    return list(stores.values())
 
 
-@app.get("/stores/<string:name>")
-def get_store(name):
-    for store in stores:
-        if store["name"] == name:
-            return store
+@app.get("/stores/<string:store_id>")
+def get_store(store_id):
+    if store_id in stores:
+        return stores[store_id]
 
     return {"message": "Not Found"}, 404
 
 
 @app.post("/stores")
 def create_store():
-    request_data = request.get_json()
-    new_store = {"name": request_data["name"], "items": []}
-    stores.append(new_store)
+    store_data = request.get_json()
+    store_id = create_id()
+    new_store = {**store_data, "id": store_id}
+    stores[store_id] = new_store
     return new_store, 201
 
 
 # Items
-@app.get("/stores/<string:name>/items")
-def get_items(name):
-    for store in stores:
-        if store["name"] == name:
-            return {"items": store["items"]}
-
-    return {"message": "Not Found"}, 404
 
 
-@app.post("/stores/<string:name>/items")
-def create_item(name: str):
-    request_data = request.get_json()
-    for store in stores:
-        if store["name"] == name:
-            new_item = {"name": request_data["name"], "price": request_data["price"]}
-            store["items"].append(new_item)
-            return new_item
+@app.get("/items")
+def get_all_items():
+    return {"items": list(items.values())}
 
-    return {"message": "Not Found"}, 404
+
+@app.get("/items/<string:item_id>")
+def get_item(item_id):
+    if item_id in items:
+        return items[item_id]
+
+    return {"message": "Item not found"}, 404
+
+
+@app.post("/items")
+def create_item():
+    item_data = request.get_json()
+    if item_data["store_id"] not in stores:
+        return {"message": "Store not found"}, 404
+
+    item_id = create_id()
+    item = {**item_data, "id": item_id}
+    items[item_id] = item
+
+    return item

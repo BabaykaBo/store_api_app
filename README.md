@@ -16,6 +16,8 @@ Go to the project directory
   cd store_api_app
 ~~~
 
+Copy `.flaskenv-example` to `.flaskenv`
+
 Install dependencies  
 
 ~~~bash  

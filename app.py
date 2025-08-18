@@ -46,6 +46,15 @@ def create_store():
     return new_store, 201
 
 
+@app.delete("/stores/<string:store_id>")
+def delete_store(store_id):
+    if store_id in stores:
+        del stores[store_id]
+        return "", 204
+
+    abort(404, message="Store not found")
+
+
 # Items
 
 
@@ -90,3 +99,36 @@ def create_item():
     items[item_id] = item
 
     return item
+
+
+@app.put("/items/<string:item_id>")
+def update_item(item_id):
+    item_data = request.get_json()
+    price = item_data["price"] if "price" in item_data else None
+    name = item_data["name"] if "name" in item_data else None
+
+    if not price and not name:
+        abort(
+            400,
+            message="Bad request. Ensure 'price' or 'name' are included in the JSON payload.",
+        )
+
+    if item_id in items:
+        if name:
+            items[item_id]["name"] = name
+
+        if price:
+            items[item_id]["price"] = price
+
+        return "", 204
+    else:
+        abort(404, message="Item not found")
+
+
+@app.delete("/items/<string:item_id>")
+def delete_item(item_id):
+    if item_id in items:
+        del items[item_id]
+        return "", 204
+
+    abort(404, message="Item not found")

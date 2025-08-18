@@ -2,6 +2,14 @@
 # Stores API 
 Study project with Python and Flask. API for management stores.  
 
+## Requirements
+* Python >= 3.12
+* Flask >= 3.1.1
+* flask-smorest >= 0.46.1
+* Flask-SQLAlchemy >= 3.1.1
+* python-dotenv >= 1.1.1
+* SQLAlchemy >= 2.0.43
+
 ## Run Locally  
 
 Clone the project  

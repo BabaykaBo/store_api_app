@@ -1,8 +1,9 @@
-from resources.helper import create_id
+from db import db
+from models.store import StoreModel
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from flask import request
 from flask_smorest import abort, Blueprint
 from flask.views import MethodView
-from db import stores
 from schemas import StoreSchema
 
 blp = Blueprint("stores", __name__, description="Operations on stores")
@@ -12,34 +13,38 @@ blp = Blueprint("stores", __name__, description="Operations on stores")
 class Store(MethodView):
     @blp.response(200, StoreSchema)
     def get(self, store_id):
-        if store_id in stores:
-            return stores[store_id]
-
-        abort(404, message="Store not found")
+        return StoreModel.query.get_or_404(store_id)
 
     @blp.response(204)
     def delete(self, store_id):
-        if store_id in stores:
-            del stores[store_id]
-            return None
+        store = StoreModel.query.get_or_404(store_id)
 
-        abort(404, message="Store not found")
+        try:
+            db.session.delete(store)
+            db.session.commit()
+        except SQLAlchemyError:
+            abort(500, message="Error while deleting store!")
+            
+        return None
 
 
 @blp.route("/stores")
 class StoreList(MethodView):
     @blp.response(200, StoreSchema(many=True))
     def get(self):
-        return stores.values()
+        return StoreModel.query.all()
 
     @blp.response(201, StoreSchema)
     @blp.arguments(StoreSchema)
     def post(self, store_data):
-        for store in stores.values():
-            if store_data["name"] == store["name"]:
-                abort(400, message=f"Store already exists.")
+        store = StoreModel(**store_data)
 
-        store_id = create_id()
-        new_store = {**store_data, "id": store_id}
-        stores[store_id] = new_store
-        return new_store
+        try:
+            db.session.add(store)
+            db.session.commit()
+        except IntegrityError:
+            abort(400, message="A store with that name already exists!")
+        except SQLAlchemyError:
+            abort(500, message="Error while creating store!")
+
+        return store

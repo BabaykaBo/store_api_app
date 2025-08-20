@@ -1,7 +1,6 @@
 from db import db
 from models.store import StoreModel
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
-from flask import request
 from flask_smorest import abort, Blueprint
 from flask.views import MethodView
 from schemas import StoreSchema
@@ -9,7 +8,7 @@ from schemas import StoreSchema
 blp = Blueprint("stores", __name__, description="Operations on stores")
 
 
-@blp.route("/stores/<string:store_id>")
+@blp.route("/stores/<int:store_id>")
 class Store(MethodView):
     @blp.response(200, StoreSchema)
     def get(self, store_id):

@@ -12,3 +12,9 @@ class StoreModel(db.Model):
         lazy="dynamic",
         cascade="all, delete, delete-orphan",
     )
+    tags = db.relationship(
+        "TagModel",
+        back_populates="store",
+        lazy="dynamic",
+        cascade="all, delete, delete-orphan",
+    )

@@ -7,6 +7,7 @@ from models.store import StoreModel
 
 from resources.item import blp as ItemBlp
 from resources.store import blp as StoreBlp
+from resources.tag import blp as TagBlp
 
 def create_app(db_url=None):
     app: Flask = Flask(__name__)
@@ -33,5 +34,6 @@ def create_app(db_url=None):
 
     api.register_blueprint(ItemBlp)
     api.register_blueprint(StoreBlp)
+    api.register_blueprint(TagBlp)
     
     return app

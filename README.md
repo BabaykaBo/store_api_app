@@ -24,7 +24,7 @@ Go to the project directory
   cd store_api_app
 ~~~
 
-Copy `.flaskenv-example` to `.flaskenv`
+Copy `.flaskenv-example` to `.flaskenv`. Copy `.env-example` to `.env` and set secret key for JWT.
 
 Install dependencies  
 

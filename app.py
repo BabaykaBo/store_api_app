@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-from flask import Flask
+from flask import Flask, jsonify
 from flask_smorest import Api
 from flask_jwt_extended import JWTManager
 
@@ -39,6 +39,32 @@ def create_app(db_url=None):
     api = Api(app)
 
     jwt = JWTManager(app)
+
+    jwt.expired_token_loader(
+        lambda jwt_header, jwt_payload: (
+            jsonify({"message": "Token expired", "error": "token_expired"}),
+            401,
+        )
+    )
+
+    jwt.invalid_token_loader(
+        lambda error: (
+            jsonify({"message": "Token invalid", "error": "invalid_token"}),
+            401,
+        )
+    )
+
+    jwt.unauthorized_loader(
+        lambda error: (
+            jsonify(
+                {
+                    "message": "Unauthorized request! Request must contain access token",
+                    "error": "unauthorized_request",
+                }
+            ),
+            401,
+        )
+    )
 
     with app.app_context():
         db.create_all()

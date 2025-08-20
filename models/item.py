@@ -1,5 +1,5 @@
 from db import db
-from models.item_tags import items_tags
+from tables.item_tags import items_tags
 
 
 class ItemModel(db.Model):

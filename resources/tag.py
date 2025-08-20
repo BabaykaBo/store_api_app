@@ -5,6 +5,7 @@ from models.tag import TagModel
 from schemas import TagSchema, TagItemSchema
 from flask_smorest import Blueprint, abort
 from flask.views import MethodView
+from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 blp = Blueprint("tags", __name__, description="Operations on tags")
@@ -12,10 +13,12 @@ blp = Blueprint("tags", __name__, description="Operations on tags")
 
 @blp.route("/stores/<int:store_id>/tags")
 class StoreTagList(MethodView):
+    @jwt_required()
     @blp.response(200, TagSchema(many=True))
     def get(self, store_id):
         return StoreModel.query.get_or_404(store_id).tags.all()
 
+    @jwt_required()
     @blp.response(201, TagSchema)
     @blp.arguments(TagSchema)
     def post(self, tag_data, store_id):
@@ -32,15 +35,18 @@ class StoreTagList(MethodView):
             db.session.add(tag)
             db.session.commit()
         except IntegrityError:
-            abort(409, message="Error: Tag with that name already exists for this store!")
+            abort(
+                409, message="Error: Tag with that name already exists for this store!"
+            )
         except SQLAlchemyError:
             abort(500, message="Error occurred while creating tag!")
 
         return tag
-    
+
 
 @blp.route("/stores/<int:store_id>/tags/<int:tag_id>")
 class StoreTag(MethodView):
+    @jwt_required()
     @blp.response(204)
     def delete(self, store_id, tag_id):
         tag = TagModel.query.get_or_404(tag_id)
@@ -59,6 +65,7 @@ class StoreTag(MethodView):
 
 @blp.route("/items/<int:item_id>/tags/<int:tag_id>")
 class LinkTagsToItem(MethodView):
+    @jwt_required()
     @blp.response(201, TagSchema)
     def post(self, item_id, tag_id):
         item = ItemModel.query.get_or_404(item_id)
@@ -76,6 +83,7 @@ class LinkTagsToItem(MethodView):
 
         return tag
 
+    @jwt_required()
     @blp.response(200, TagItemSchema)
     def delete(self, item_id, tag_id):
         item = ItemModel.query.get_or_404(item_id)
@@ -92,5 +100,3 @@ class LinkTagsToItem(MethodView):
             abort(500, message="Error occurred while unlinking tag and item!")
 
         return {"message": "Item removed from tag", "tag": tag, "item": item}
-
-

@@ -42,7 +42,7 @@ class UserLogin(MethodView):
         ).first()
 
         if user and phs256.verify(user_data["password"], user.password):
-            access_token = create_access_token(identity=user.id)
+            access_token = create_access_token(identity=str(user.id))
         else:
             abort(401, message="Invalid username or password!")
 

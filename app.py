@@ -12,6 +12,7 @@ from models.store import StoreModel
 from resources.item import blp as ItemBlp
 from resources.store import blp as StoreBlp
 from resources.tag import blp as TagBlp
+from resources.user import blp as UserBlp
 
 
 def create_app(db_url=None):
@@ -45,5 +46,6 @@ def create_app(db_url=None):
     api.register_blueprint(ItemBlp)
     api.register_blueprint(StoreBlp)
     api.register_blueprint(TagBlp)
+    api.register_blueprint(UserBlp)
 
     return app

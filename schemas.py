@@ -61,3 +61,6 @@ class UserSchema(Schema):
     id = fields.Integer(dump_only=True)
     username = fields.Str(required=True)
     password = fields.Str(required=True, load_only=True)
+    
+class UserAuthSchema(UserSchema):
+    access_token = fields.Str(required=True, dump_only=True)

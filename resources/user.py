@@ -1,11 +1,12 @@
 from db import db
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from models.user import UserModel
+from models.revoked_token import RevokedTokenModel
 from flask_smorest import abort, Blueprint
 from flask.views import MethodView
 from schemas import UserSchema, UserAuthSchema
 from passlib.hash import pbkdf2_sha256 as phs256
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt
 
 blp = Blueprint("users", __name__, description="Operations on users")
 
@@ -47,3 +48,26 @@ class UserLogin(MethodView):
             abort(401, message="Invalid username or password!")
 
         return {**user_data, "access_token": access_token}
+
+
+@blp.route("/logout")
+class UserLogout(MethodView):
+    @jwt_required()
+    @blp.response(204)
+    def post(self):
+        jti = get_jwt()["jti"]
+
+        if RevokedTokenModel.query.filter_by(jti=jti).first():
+            return None
+
+        revoked_token = RevokedTokenModel(jti=jti)  # type: ignore
+
+        try:
+            db.session.add(revoked_token)
+            db.session.commit()
+        except IntegrityError:
+            return None
+        except SQLAlchemyError:
+            abort(500, message="Error while logout!")
+
+        return None

@@ -6,8 +6,7 @@ from flask_smorest import Api
 from flask_jwt_extended import JWTManager
 
 from db import db
-from models.item import ItemModel
-from models.store import StoreModel
+from models.revoked_token import RevokedTokenModel
 
 from resources.item import blp as ItemBlp
 from resources.store import blp as StoreBlp
@@ -33,12 +32,26 @@ def create_app(db_url=None):
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["PROPAGATE_EXCEPTIONS"] = True
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "1234")
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 1800
 
     db.init_app(app)
 
     api = Api(app)
 
     jwt = JWTManager(app)
+
+    @jwt.token_in_blocklist_loader
+    def check_if_token_revoked(jwt_header, jwt_payload):
+        jti = jwt_payload["jti"]
+        token = RevokedTokenModel.query.filter_by(jti=jti).first()
+        return token is not None
+
+    jwt.revoked_token_loader(
+        lambda jwt_header, jwt_payload: (
+            jsonify({"message": "Token revoked", "error": "token_revoked"}),
+            401,
+        )
+    )
 
     jwt.expired_token_loader(
         lambda jwt_header, jwt_payload: (

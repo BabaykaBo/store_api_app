@@ -5,13 +5,13 @@ from models.tag import TagModel
 from schemas import TagSchema, TagItemSchema
 from flask_smorest import Blueprint, abort
 from flask.views import MethodView
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 blp = Blueprint("tags", __name__, description="Operations on tags")
 
 
 @blp.route("/stores/<int:store_id>/tags")
-class StoreTag(MethodView):
+class StoreTagList(MethodView):
     @blp.response(200, TagSchema(many=True))
     def get(self, store_id):
         return StoreModel.query.get_or_404(store_id).tags.all()
@@ -31,10 +31,30 @@ class StoreTag(MethodView):
         try:
             db.session.add(tag)
             db.session.commit()
+        except IntegrityError:
+            abort(409, message="Error: Tag with that name already exists for this store!")
         except SQLAlchemyError:
             abort(500, message="Error occurred while creating tag!")
 
         return tag
+    
+
+@blp.route("/stores/<int:store_id>/tags/<int:tag_id>")
+class StoreTag(MethodView):
+    @blp.response(204)
+    def delete(self, store_id, tag_id):
+        tag = TagModel.query.get_or_404(tag_id)
+
+        if tag.store_id != store_id:
+            abort(400, message="This store has not such tag!")
+
+        try:
+            db.session.delete(tag)
+            db.session.commit()
+        except SQLAlchemyError:
+            abort(500, message="Error occurred while creating tag!")
+
+        return None
 
 
 @blp.route("/items/<int:item_id>/tags/<int:tag_id>")
@@ -72,3 +92,5 @@ class LinkTagsToItem(MethodView):
             abort(500, message="Error occurred while unlinking tag and item!")
 
         return {"message": "Item removed from tag", "tag": tag, "item": item}
+
+

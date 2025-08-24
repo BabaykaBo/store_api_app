@@ -46,7 +46,7 @@ class StoreTagList(MethodView):
 
 @blp.route("/stores/<int:store_id>/tags/<int:tag_id>")
 class StoreTag(MethodView):
-    @jwt_required()
+    @jwt_required(fresh=True)
     @blp.response(204)
     def delete(self, store_id, tag_id):
         tag = TagModel.query.get_or_404(tag_id)
@@ -83,7 +83,7 @@ class LinkTagsToItem(MethodView):
 
         return tag
 
-    @jwt_required()
+    @jwt_required(fresh=True)
     @blp.response(200, TagItemSchema)
     def delete(self, item_id, tag_id):
         item = ItemModel.query.get_or_404(item_id)

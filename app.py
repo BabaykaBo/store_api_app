@@ -79,6 +79,18 @@ def create_app(db_url=None):
         )
     )
 
+    jwt.needs_fresh_token_loader(
+        lambda jwt_header, jwt_payload: (
+            jsonify(
+                {
+                    "message": "Token is not fresh",
+                    "error": "fresh_token_required",
+                }
+            ),
+            401,
+        )
+    )
+
     with app.app_context():
         db.create_all()
 

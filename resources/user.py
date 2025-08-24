@@ -4,9 +4,15 @@ from models.user import UserModel
 from models.revoked_token import RevokedTokenModel
 from flask_smorest import abort, Blueprint
 from flask.views import MethodView
-from schemas import UserSchema, UserAuthSchema
+from schemas import UserSchema, UserAuthSchema, AccessTokenSchema
 from passlib.hash import pbkdf2_sha256 as phs256
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    get_jwt_identity,
+    jwt_required,
+    get_jwt,
+)
 
 blp = Blueprint("users", __name__, description="Operations on users")
 
@@ -43,11 +49,26 @@ class UserLogin(MethodView):
         ).first()
 
         if user and phs256.verify(user_data["password"], user.password):
-            access_token = create_access_token(identity=str(user.id))
+            access_token = create_access_token(identity=str(user.id), fresh=True)
+            refresh_token = create_refresh_token(identity=str(user.id))
         else:
             abort(401, message="Invalid username or password!")
 
-        return {**user_data, "access_token": access_token}
+        return {
+            **user_data,
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+        }
+
+
+@blp.route("/refresh")
+class RefreshToken(MethodView):
+    @jwt_required(refresh=True)
+    @blp.response(200, AccessTokenSchema)
+    def post(self):
+        current_user = get_jwt_identity()
+        new_token = create_access_token(identity=current_user, fresh=False)
+        return {"access_token": new_token}
 
 
 @blp.route("/logout")

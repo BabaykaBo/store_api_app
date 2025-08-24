@@ -36,7 +36,7 @@ class Item(MethodView):
 
         return None
 
-    @jwt_required()
+    @jwt_required(fresh=True)
     @blp.response(204)
     def delete(self, item_id):
         item = ItemModel.query.get_or_404(item_id)

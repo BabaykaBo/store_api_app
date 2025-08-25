@@ -27,6 +27,9 @@ class Item(MethodView):
 
         if "name" in item_data:
             item.name = item_data["name"]
+            
+        if "description" in item_data:
+            item.description = item_data["description"]
 
         try:
             db.session.add(item)

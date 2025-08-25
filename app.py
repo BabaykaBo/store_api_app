@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify
 from flask_smorest import Api
 from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
 
 from db import db
 from models.revoked_token import RevokedTokenModel
@@ -35,7 +36,8 @@ def create_app(db_url=None):
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 1800
 
     db.init_app(app)
-
+    migrate = Migrate(app, db)
+    
     api = Api(app)
 
     jwt = JWTManager(app)

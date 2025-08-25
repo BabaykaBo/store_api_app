@@ -17,6 +17,7 @@ class PlainStoreSchema(Schema):
 class PlainTagSchema(Schema):
     id = fields.Integer(dump_only=True)
     name = fields.Str(required=True)
+    description = fields.Str()
 
 
 # Item
@@ -30,6 +31,7 @@ class ItemSchema(PlainItemSchema):
 
 class ItemUpdateSchema(Schema):
     name = fields.Str()
+    description = fields.Str()
     price = fields.Float()
 
 

@@ -24,7 +24,7 @@ Go to the project directory
   cd store_api_app
 ~~~
 
-Copy `.flaskenv-example` to `.flaskenv`. Copy `.env-example` to `.env` and set secret key for JWT.
+Copy `.flaskenv-example` to `.flaskenv`. Copy `.env-example` to `.env`. Set environment variables.
 
 Install dependencies  
 
@@ -36,6 +36,12 @@ Start the server
 
 ~~~bash  
 flask run
+~~~
+
+OR use `gunicorn`
+
+~~~bash
+ gunicorn wsgi:app --bind localhost:5000
 ~~~
 
 See API with link: `http://127.0.0.1:5000/swagger-ui`
